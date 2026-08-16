@@ -6,6 +6,7 @@ description = "Genie — 1-bit multimodal liquid diffusion LLM"
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }
+clap = { version = "4", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tch = "0.15"        # PyTorch C++ bindings (libtorch)

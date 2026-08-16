@@ -67,6 +67,13 @@ Genie is a 1-bit (BitNet b1.58) diffusion language model with liquid neural netw
 
 Genie runs as a systemd service (`genied`) and communicates with the Lamp terminal over local TCP.
 
+The full model spec and training stack live in [`genie/ARCHITECTURE.md`](genie/ARCHITECTURE.md). The trainable PyTorch implementation (ternary QAT backbone, masked-diffusion head, CfC liquid cells, vision/audio encoders, BitNet export) is in `genie/training/`:
+
+```bash
+python genie/training/train.py --config genie/training/configs/smoke.yaml --out /tmp/genie-ckpt
+python genie/training/export_bitnet.py --ckpt /tmp/genie-ckpt/final.pt --out /tmp/genie-export
+```
+
 ### Multi-cursor system
 
 Since DriftWM is an infinite tiling compositor, Genie gets its own cursor. When Genie takes a screenshot, it's centered around its cursor position at its current zoom level. This lets Genie:
