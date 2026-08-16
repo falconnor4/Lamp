@@ -1,0 +1,20 @@
+[package]
+name = "genie"
+version = "0.1.0"
+edition = "2021"
+description = "Genie — 1-bit multimodal liquid diffusion LLM"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tch = "0.15"        # PyTorch C++ bindings (libtorch)
+candle-core = "0.5"  # Fallback lightweight inference
+half = "2"           # f16 / bf16 types
+image = "0.25"       # Vision input processing
+hound = "3"          # WAV audio processing
+futures = "0.3"
+thiserror = "1"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+anyhow = "1"

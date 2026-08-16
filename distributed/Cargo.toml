@@ -1,0 +1,15 @@
+[package]
+name = "lamp-distributed"
+version = "0.1.0"
+edition = "2021"
+description = "Lamp distributed OS mesh layer"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+mdns-sd = "0.12"      # mDNS peer discovery
+mdns = "3"            # Service discovery
+anyhow = "1"
+tracing = "0.1"
+clap = { version = "4", features = ["derive"] }

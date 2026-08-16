@@ -1,0 +1,7 @@
+[package]
+name = "lin"
+version = "0.1.0"
+edition = "2021"
+description = "Lin language Rust bindings for CPU/GPU unified compute"
+
+[dependencies]

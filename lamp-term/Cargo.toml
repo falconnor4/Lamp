@@ -1,0 +1,15 @@
+[package]
+name = "lamp-term"
+version = "0.1.0"
+edition = "2021"
+description = "Lamp terminal — Genie-chat + /command routing"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ratatui = "0.27"
+crossterm = "0.28"
+anyhow = "1"
+genie = { path = "../genie" }
+tracing = "0.1"
