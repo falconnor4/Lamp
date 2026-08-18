@@ -1,0 +1,26 @@
+# Text-only pretrain on FineWeb-Edu (vision/audio disabled: no multimodal
+# batches yet, so their encoders would just eat AdamW state + VRAM for nothing).
+# Budget: 16000 steps * 64 batch * 2048 seq ~= 2.1B tokens ~= ~12h on a 4090.
+vocab_size: 32768
+d_model: 768
+n_layers: 12
+n_heads: 12
+n_kv_heads: 4
+head_dim: 64
+mlp_ratio: 3.5
+max_seq_len: 2048
+block_size: 32
+seq_len: 2048
+tie_embeddings: true
+ternary_weights: true
+act_quant: true
+liquid_every: 0
+vision_enabled: false
+audio_enabled: false
+batch_size: 64
+warmup_steps: 2000
+total_steps: 16000
+lr: 0.0003
+weight_decay: 0.1
+grad_checkpoint: true
+diffusion_steps: 8

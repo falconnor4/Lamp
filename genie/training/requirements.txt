@@ -1,0 +1,9 @@
+# Torch comes from the RunPod PyTorch image; do NOT pin torch here or it will
+# clobber the CUDA build. Install only the training-stack deps.
+numpy
+pyyaml
+tokenizers>=0.19
+safetensors
+tqdm
+datasets
+huggingface_hub
