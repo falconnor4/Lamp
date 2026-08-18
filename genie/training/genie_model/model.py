@@ -43,11 +43,14 @@ class GenieLM(nn.Module):
             emb = self.memory.inject(emb, memory)
         return emb
 
-    def logits(self, ids, images=None, audio=None, cursor=None, memory=None, attn_mask=None):
-        h = self.backbone(self.embed(ids, images, audio, cursor, memory), attn_mask)
+    def _head(self, h):
         if self.head is None:
             return torch.nn.functional.linear(h, self.tok_emb.weight)
         return self.head(h)
+
+    def logits(self, ids, images=None, audio=None, cursor=None, memory=None, attn_mask=None):
+        h = self.backbone(self.embed(ids, images, audio, cursor, memory), attn_mask)
+        return self._head(h)
 
     def forward(self, input_ids, images=None, audio=None, cursor=None, memory=None):
         protect = [self.cfg.pad_id]
@@ -56,9 +59,9 @@ class GenieLM(nn.Module):
         if audio is not None:
             protect.append(self.cfg.audio_id)
         corrupted, mask, t = self.diffusion.corrupt(input_ids, self.cfg.block_size, protect)
-        logits = self.logits(corrupted, images, audio, cursor, memory)
-        loss = self.diffusion.loss(logits, input_ids, mask, t, self.cfg.block_size)
-        return loss, logits
+        h = self.backbone(self.embed(corrupted, images, audio, cursor, memory), None)
+        loss = self.diffusion.loss(h, self._head, input_ids, mask, t, self.cfg.block_size, self.cfg.loss_chunk)
+        return loss, h
 
     @torch.no_grad()
     def update_memory(self, memory, ids, images=None, audio=None, cursor=None):

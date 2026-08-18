@@ -30,8 +30,8 @@ def test_forward_backward():
     cfg = smoke_config()
     model = GenieLM(cfg)
     ids = torch.randint(10, cfg.vocab_size, (2, cfg.seq_len))
-    loss, logits = model(ids)
-    assert logits.shape == (2, cfg.seq_len, cfg.vocab_size)
+    loss, hidden = model(ids)
+    assert hidden.shape == (2, cfg.seq_len, cfg.d_model)
     loss.backward()
     grads = [p.grad for p in model.backbone.parameters() if p.grad is not None]
     assert grads and all(torch.isfinite(g).all() for g in grads)

@@ -40,6 +40,7 @@ class GenieConfig:
 
     diffusion_weight_clamp: float = 5.0
     diffusion_steps: int = 8
+    loss_chunk: int = 256
 
     lr: float = 3e-4
     weight_decay: float = 0.1

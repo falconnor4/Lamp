@@ -19,13 +19,22 @@ class MaskedDiffusion:
         corrupted = torch.where(mask, torch.full_like(input_ids, self.mask_id), input_ids)
         return corrupted, mask, t
 
-    def loss(self, logits, target, mask, t, block_size):
-        B, L, V = logits.shape
-        ce = F.cross_entropy(logits.reshape(-1, V), target.reshape(-1), reduction="none")
-        ce = ce.reshape(B, L)
+    def loss(self, hidden, head_fn, target, mask, t, block_size, chunk=256):
+        B, L, _ = hidden.shape
         weight = (1.0 / (1.0 - t).clamp_min(1e-4)).clamp_max(self.weight_clamp)
         weight = weight.repeat_interleave(block_size, dim=1)
-        return (ce * mask * weight).sum() / mask.sum().clamp_min(1.0)
+        total = 0.0
+        denom = 0.0
+        for i in range(0, L, chunk):
+            logits = head_fn(hidden[:, i : i + chunk])
+            ce = F.cross_entropy(
+                logits.reshape(-1, logits.shape[-1]),
+                target[:, i : i + chunk].reshape(-1),
+                reduction="none",
+            ).reshape(B, -1)
+            total = total + (ce * mask[:, i : i + chunk] * weight[:, i : i + chunk]).sum()
+            denom = denom + mask[:, i : i + chunk].sum()
+        return total / denom.clamp_min(1.0)
 
     @torch.no_grad()
     def reverse_step(self, x, x0, t, s):
