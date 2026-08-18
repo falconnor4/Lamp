@@ -1,5 +1,6 @@
 import torch
 import torch.nn.functional as F
+from torch.utils.checkpoint import checkpoint as _ckpt
 
 
 class MaskedDiffusion:
@@ -23,18 +24,28 @@ class MaskedDiffusion:
         B, L, _ = hidden.shape
         weight = (1.0 / (1.0 - t).clamp_min(1e-4)).clamp_max(self.weight_clamp)
         weight = weight.repeat_interleave(block_size, dim=1)
-        total = 0.0
-        denom = 0.0
-        for i in range(0, L, chunk):
-            logits = head_fn(hidden[:, i : i + chunk])
+        denom = mask.sum().clamp_min(1.0)
+
+        def chunk_ce(h_c, tgt_c, msk_c, w_c):
+            logits = head_fn(h_c)
             ce = F.cross_entropy(
                 logits.reshape(-1, logits.shape[-1]),
-                target[:, i : i + chunk].reshape(-1),
+                tgt_c.reshape(-1),
                 reduction="none",
             ).reshape(B, -1)
-            total = total + (ce * mask[:, i : i + chunk] * weight[:, i : i + chunk]).sum()
-            denom = denom + mask[:, i : i + chunk].sum()
-        return total / denom.clamp_min(1.0)
+            return (ce * msk_c * w_c).sum()
+
+        total = hidden.new_zeros(())
+        for i in range(0, L, chunk):
+            total = total + _ckpt(
+                chunk_ce,
+                hidden[:, i : i + chunk],
+                target[:, i : i + chunk],
+                mask[:, i : i + chunk],
+                weight[:, i : i + chunk],
+                use_reentrant=False,
+            )
+        return total / denom
 
     @torch.no_grad()
     def reverse_step(self, x, x0, t, s):

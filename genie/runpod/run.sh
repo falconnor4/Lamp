@@ -16,6 +16,9 @@ LOG_EVERY="${LOG_EVERY:-20}"
 FORCE_DOWNLOAD="${FORCE_DOWNLOAD:-0}"
 FORCE_TOKENIZE="${FORCE_TOKENIZE:-0}"
 
+# Reduce CUDA allocator fragmentation (recommended by torch OOM messages).
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+
 cd "$REPO_DIR"
 python -m pip install --no-cache-dir -r genie/training/requirements.txt
 mkdir -p "$DATA_DIR" "$CKPT_DIR"
