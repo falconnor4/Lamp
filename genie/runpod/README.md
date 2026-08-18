@@ -62,6 +62,12 @@ Progress is logged to stdout (RunPod's Logs tab) and to
 | `CONFIG` | `configs/pretrain-100m-fineweb.yaml` | model config |
 | `EVAL_EVERY` | 500 | steps between eval-loss checks |
 | `SAVE_EVERY` | 1000 | steps between checkpoints |
+| `FORCE_DOWNLOAD` | 0 | set `1` to re-download even if shards exist |
+| `FORCE_TOKENIZE` | 0 | set `1` to re-tokenize even if token bins exist |
+
+`run.sh` is idempotent: on a restarted pod it skips download/tokenization if
+the artifacts already exist on the volume, so a resume goes straight to
+training.
 
 To smoke-test the pipeline first (before committing to 12h), set `STEPS=50`
 and `TOTAL_GB=1`.

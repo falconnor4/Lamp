@@ -10,13 +10,24 @@ import numpy as np
 from genie_model.tokenizer import load, train_bpe
 
 
+CHUNK_CHARS = 1_000_000
+
+
 def tokenize_file(path, tokenizer_path, tmp_dir):
     tok = load(tokenizer_path)
-    with open(path, encoding="utf-8", errors="ignore") as f:
-        ids = tok.encode(f.read()).ids
-    arr = np.asarray(ids, dtype=np.uint16)
     part = os.path.join(tmp_dir, os.path.basename(path) + ".part.bin")
-    arr.tofile(part)
+    buf = []
+    buf_chars = 0
+    with open(path, encoding="utf-8", errors="ignore") as f, open(part, "wb") as out:
+        for line in f:
+            buf.append(line)
+            buf_chars += len(line)
+            if buf_chars >= CHUNK_CHARS:
+                np.asarray(tok.encode("".join(buf)).ids, dtype=np.uint16).tofile(out)
+                buf = []
+                buf_chars = 0
+        if buf:
+            np.asarray(tok.encode("".join(buf)).ids, dtype=np.uint16).tofile(out)
     return part
 
 
