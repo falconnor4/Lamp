@@ -57,11 +57,17 @@ else
 fi
 
 echo "=== 4/4 train ==="
+RESUME_ARG=""
+if [ -f "$CKPT_DIR/latest.pt" ]; then
+  RESUME_ARG="--resume $CKPT_DIR/latest.pt"
+  echo "resuming from $CKPT_DIR/latest.pt"
+fi
 python genie/training/train.py \
   --config "genie/training/$CONFIG" \
   --data "$TOKENS" \
   --eval-data "$EVAL_BIN" --eval-every "$EVAL_EVERY" \
   --out "$CKPT_DIR" --steps "$STEPS" \
-  --save-every "$SAVE_EVERY" --log-every "$LOG_EVERY" --workers 2
+  --save-every "$SAVE_EVERY" --log-every "$LOG_EVERY" --workers 2 \
+  $RESUME_ARG
 
 echo "Training complete. Checkpoints + train_log.jsonl in $CKPT_DIR"
