@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["genie", "lamp-term", "shell", "distributed", "lin"]
+members = ["genie", "genie-infer", "lamp-term", "shell", "distributed", "lin"]
 
 [profile.release]
 lto = "thin"

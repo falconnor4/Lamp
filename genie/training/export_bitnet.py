@@ -7,7 +7,7 @@ from safetensors.torch import save_file
 
 from genie_model.config import GenieConfig
 from genie_model.model import GenieLM
-from genie_model.quant import int8_quantize
+from genie_model.backbone import RMSNorm
 
 
 @torch.no_grad()
@@ -31,13 +31,13 @@ def main():
             tensors[f"{name}.scale"] = scale.reshape(1)
             if module.bias is not None:
                 tensors[f"{name}.bias"] = module.bias.contiguous()
+        elif isinstance(module, RMSNorm):
+            tensors[f"{name}.weight"] = module.weight.detach().float().contiguous()
 
-    q, scale = int8_quantize(model.tok_emb.weight)
-    tensors["tok_emb.weight"] = q.contiguous()
-    tensors["tok_emb.scale"] = scale.reshape(1)
-    if model.head is None:
-        tensors["head.weight"] = tensors["tok_emb.weight"].clone()
-        tensors["head.scale"] = tensors["tok_emb.scale"].clone()
+    # Full-precision token embedding (used for embed lookup and the tied LM head).
+    tensors["tok_emb.weight"] = model.tok_emb.weight.detach().float().contiguous()
+    # Text-only inference adds the modality embedding for modality id 0 to every token.
+    tensors["modality_emb.weight"] = model.modality_emb.weight.detach().float().contiguous()
 
     os.makedirs(args.out, exist_ok=True)
     save_file(tensors, os.path.join(args.out, "genie.safetensors"))
