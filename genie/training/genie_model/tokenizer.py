@@ -1,4 +1,4 @@
-from tokenizers import Tokenizer, models, pre_tokenizers, trainers, processors
+from tokenizers import Tokenizer, decoders, models, pre_tokenizers, processors, trainers
 
 SPECIAL_TOKENS = [
     "<|pad|>",
@@ -26,9 +26,13 @@ def train_bpe(files, vocab_size, out_path):
     )
     tokenizer.train(files, trainer)
     tokenizer.post_processor = processors.ByteLevel()
+    tokenizer.decoder = decoders.ByteLevel()
     tokenizer.save(out_path)
     return tokenizer
 
 
 def load(path):
-    return Tokenizer.from_file(path)
+    tokenizer = Tokenizer.from_file(path)
+    if tokenizer.decoder is None:
+        tokenizer.decoder = decoders.ByteLevel()
+    return tokenizer
