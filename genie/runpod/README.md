@@ -46,7 +46,7 @@ cd /workspace && rm -rf Lamp && git clone https://github.com/falconnor4/Lamp.git
    (`uint16` memmap) and holds out 0.5% into `eval.bin`.
 4. `train.py` runs 16000 steps (~2.1B tokens) on
    `configs/pretrain-100m-fineweb.yaml`, logging JSONL and saving `stepN.pt` +
-   `latest.pt` every 1000 steps plus `final.pt`.
+   `latest.pt` every 500 steps plus `final.pt`.
 
 Progress is logged to stdout (RunPod's Logs tab) and to
 `/workspace/genie-ckpt/train_log.jsonl` (train + eval loss every 500 steps).
@@ -61,7 +61,7 @@ Progress is logged to stdout (RunPod's Logs tab) and to
 | `TOTAL_GB` | 10 | GB of text to download |
 | `CONFIG` | `configs/pretrain-100m-fineweb.yaml` | model config |
 | `EVAL_EVERY` | 500 | steps between eval-loss checks |
-| `SAVE_EVERY` | 1000 | steps between checkpoints |
+| `SAVE_EVERY` | 500 | steps between checkpoints |
 | `FORCE_DOWNLOAD` | 0 | set `1` to re-download even if shards exist |
 | `FORCE_TOKENIZE` | 0 | set `1` to re-tokenize even if token bins exist |
 
