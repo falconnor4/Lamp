@@ -42,6 +42,9 @@ class GenieConfig:
     diffusion_steps: int = 8
     loss_chunk: int = 256
 
+    affect_dim: int = 16
+    affect_weight: float = 0.1
+
     lr: float = 3e-4
     weight_decay: float = 0.1
     betas: tuple = (0.9, 0.95)

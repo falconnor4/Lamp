@@ -195,7 +195,31 @@ The Rust `genied` (candle) loads this directly; the layout matches
 microsoft/BitNet's ternary expectations so BitNet kernels can be dropped in for
 fast CPU/ARM inference on both the desktop and the phone.
 
-## 9. Roadmap
+## 9. Affect readout (predictive coding)
+
+`genie_model/affect.py`
+
+Two auxiliary modules give Genie a low-dimensional self-signal, in the spirit of
+brain-encoding models like TRIBE v2 (which predict internal neural responses
+rather than only the next token). Both live *after* the backbone — readouts on
+the final hidden states — so they never add recurrence inside the diffusion
+trunk and never break the masked-diffusion objective (§3).
+
+- **`SurprisePredictor`** — a first-order latent predictor (`d → d`, bias-free
+  linear) that predicts `h[t]` from `h[t-1]` *within* blocks (predictions are
+  dropped at block boundaries). Its mean-squared error is the "surprise"
+  signal. During training it contributes `affect_weight · surprise` to the
+  loss, biasing the ternary representation toward predictability — the
+  predictive-coding prior.
+- **`AffectHead`** — maps the mean-pooled hidden state to a low-dim vector in
+  `[-1, 1]` (`affect_dim`, default 16), the valence/arousal/salience readout.
+  Its `proj` maps affect back into `d_model` so it can be injected into the
+  agent-loop `LiquidMemory` context via `update_memory(..., affect=...)`.
+
+Config knobs: `affect_dim` (0 disables) and `affect_weight`. Both modules are
+full-precision readouts and are not part of the ternary BitNet export.
+
+## 10. Roadmap
 
 1. **Now:** text pretraining on packed corpora (100M config first), validate
    diffusion loss curves and block sampling quality.
@@ -206,7 +230,7 @@ fast CPU/ARM inference on both the desktop and the phone.
 5. Multi-agent: shared cursor-state tokens so co-resident Genies see each other.
 6. BitNet kernel integration in `genied`; int8/2-bit activation serving.
 
-## 10. Quickstart
+## 11. Quickstart
 
 Verified on NixOS (CPU torch). Everything runs from `genie/training/`.
 

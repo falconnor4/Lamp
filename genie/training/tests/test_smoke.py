@@ -76,3 +76,31 @@ def test_ternary_export():
     q, gamma = lin.export_quantized()
     assert set(q.unique().tolist()) <= {-1, 0, 1}
     assert gamma.item() > 0
+
+
+def test_affect():
+    cfg = smoke_config()
+    model = GenieLM(cfg)
+    ids = torch.randint(10, cfg.vocab_size, (2, cfg.seq_len))
+    affect, surprise = model.affect(ids)
+    assert affect.shape == (2, cfg.affect_dim)
+    assert torch.isfinite(surprise).all()
+
+    loss, _ = model(ids)
+    assert torch.isfinite(loss)
+    loss.backward()
+
+    h = model.memory.zero_state(2, "cpu")
+    h2 = model.update_memory(h, ids, affect=affect)
+    assert h2.shape == h.shape
+
+
+def test_affect_disabled():
+    cfg = smoke_config()
+    cfg.affect_dim = 0
+    model = GenieLM(cfg)
+    ids = torch.randint(10, cfg.vocab_size, (2, cfg.seq_len))
+    affect, surprise = model.affect(ids)
+    assert affect is None and surprise is None
+    loss, _ = model(ids)
+    assert torch.isfinite(loss)
