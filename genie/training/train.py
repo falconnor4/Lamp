@@ -12,11 +12,11 @@ from genie_model.data import PackedTokenDataset, SyntheticDataset, collate
 from genie_model.model import GenieLM
 
 
-def lr_lambda(step, warmup, total):
+def lr_lambda(step, warmup, total, min_lr_ratio=0.0):
     if step < warmup:
         return (step + 1) / max(1, warmup)
     p = (step - warmup) / max(1, total - warmup)
-    return 0.5 * (1 + math.cos(math.pi * min(1.0, p)))
+    return min_lr_ratio + (1.0 - min_lr_ratio) * 0.5 * (1 + math.cos(math.pi * min(1.0, p)))
 
 
 @torch.no_grad()
@@ -83,7 +83,7 @@ def main():
         cfg.total_steps = args.steps
 
     opt = torch.optim.AdamW(model.parameters(), lr=cfg.lr, betas=cfg.betas, weight_decay=cfg.weight_decay)
-    sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda s: lr_lambda(s, cfg.warmup_steps, cfg.total_steps))
+    sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda s: lr_lambda(s, cfg.warmup_steps, cfg.total_steps, cfg.min_lr_ratio))
     if ckpt is not None:
         opt.load_state_dict(ckpt["opt"])
         sched.load_state_dict(ckpt["sched"])

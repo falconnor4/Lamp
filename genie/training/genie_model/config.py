@@ -38,7 +38,7 @@ class GenieConfig:
     image_id: int = 5
     audio_id: int = 6
 
-    diffusion_weight_clamp: float = 5.0
+    diffusion_weight_clamp: float = 1.0
     diffusion_steps: int = 8
     loss_chunk: int = 256
 
@@ -49,6 +49,7 @@ class GenieConfig:
     weight_decay: float = 0.1
     betas: tuple = (0.9, 0.95)
     warmup_steps: int = 2000
+    min_lr_ratio: float = 0.1
     total_steps: int = 100000
     grad_clip: float = 1.0
     batch_size: int = 64

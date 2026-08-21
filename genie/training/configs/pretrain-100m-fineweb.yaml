@@ -20,7 +20,14 @@ audio_enabled: false
 batch_size: 64
 warmup_steps: 2000
 total_steps: 16000
+min_lr_ratio: 0.1
 lr: 0.0003
 weight_decay: 0.1
 grad_checkpoint: true
 diffusion_steps: 8
+# Uniform MDLM weighting: the 1/(1-t) weighting (clamp 5.0) upweights the
+# high-noise/content-free regime ~5:1, which empirically pins the model at the
+# unigram-entropy plateau (~3k steps) and prevents content-learning. clamp 1.0
+# (uniform) + a nonzero min_lr_ratio (no cosine decay to 0) is what lets the
+# model escape the statistics phase and begin learning token context.
+diffusion_weight_clamp: 1.0

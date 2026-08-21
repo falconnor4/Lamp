@@ -23,7 +23,9 @@ audio_dim: 384
 batch_size: 256
 warmup_steps: 3000
 total_steps: 300000
+min_lr_ratio: 0.1
 lr: 0.0002
 weight_decay: 0.1
 grad_checkpoint: true
 diffusion_steps: 8
+diffusion_weight_clamp: 1.0
